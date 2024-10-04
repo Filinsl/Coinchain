@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Sale</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #000; /* Черный фон */
+            color: #fff; /* Белый текст */
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .wallet-address {
+            word-break: break-all; /* Перенос длинных адресов */
+            display: inline-block; /* Для правильного позиционирования */
+            width: 100%; /* Полная ширина текстового поля */
+            max-width: 300px; /* Максимальная ширина для контроля */
+        }
+        .copied-message {
+            color: #28a745; /* Зеленый цвет для сообщения */
+            font-size: 0.9em; /* Размер шрифта */
+            margin-left: 10px; /* Отступ от адреса кошелька */
+            display: none; /* Скрыто по умолчанию */
+        }
+    </style>
+</head>
+<body>
+    <div class="container text-center">
+        <h1>Current Token Price: <span id="token-price">{{ price }}</span> BTC</h1>
+        
+        <h2>Last purchase made by wallet:</h2> <!-- Измененный текст -->
+        
+        <!-- Форма для отображения адреса кошелька -->
+        <div class="form-group d-inline-flex align-items-center">
+            <input type="text" id="copy-wallet" class="form-control wallet-address mr-2" value="{{ wallet_address }}" readonly>
+            <button class="btn btn-primary btn-sm" onclick="copyToClipboard()">Copy</button> <!-- Уменьшенная кнопка -->
+            <span class="copied-message" id="copied-message">Copied</span>
+        </div>
+    </div>
+
+    <script>
+        function updateData() {
+            fetch('/update')
+                .then(response => response.json())
+                .then(data => {
+                    // Обновляем цену токена
+                    document.getElementById('token-price').innerText = data.price.toFixed(8);
+                    // Обновляем адрес кошелька
+                    const copyWalletInput = document.getElementById('copy-wallet');
+
+                    // Проверяем, изменился ли адрес
+                    if (copyWalletInput.value !== data.wallet_address) {
+                        copyWalletInput.value = data.wallet_address; // Обновляем адрес в поле ввода
+                    }
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        function copyToClipboard() {
+            const copyText = document.getElementById("copy-wallet");
+            copyText.select();
+            document.execCommand("copy");
+
+            // Показать сообщение "Copied"
+            const copiedMessage = document.getElementById("copied-message");
+            copiedMessage.style.display = "inline"; // Показать сообщение
+            setTimeout(() => {
+                copiedMessage.style.display = "none"; // Скрыть сообщение через 2 секунды
+            }, 2000);
+        }
+
+        // Обновление данных каждые 5 секунд
+        setInterval(updateData, 5000);
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
